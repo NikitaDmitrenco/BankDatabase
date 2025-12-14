@@ -5,7 +5,8 @@ namespace BankDatabase;
 
 public class ApplicationContext : DbContext
 {
-    public DbSet<EmployeeEntity> Customers => Set<EmployeeEntity>();
+    public DbSet<EmployeeEntity> Employees => Set<EmployeeEntity>();
+    public DbSet<CustomerEntity> Customers => Set<CustomerEntity>();
 
     public ApplicationContext() 
     {
@@ -14,6 +15,6 @@ public class ApplicationContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite("Data Source=datamonitor.db");
+        optionsBuilder.UseSqlite("Data Source=bankdatabase.db");
     }
 }

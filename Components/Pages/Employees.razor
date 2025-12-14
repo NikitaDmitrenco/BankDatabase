@@ -6,8 +6,8 @@
 @using BankDatabase.Abstractions.Cron;
 @using System.ComponentModel.DataAnnotations
 @rendermode InteractiveServer
-@inject EmployeeRepository customerRepository
-@inject ILogger<Employee> Logger
+@inject EmployeeRepository employeeRepository
+@inject ILogger<Employees> Logger
 @inject IDialogService DialogService
 
 <MudDialogProvider />
@@ -15,7 +15,7 @@
 
 @if (pageState.Equals(PageState.Default))
 {   
-    <MudTable Items="customers" Hover="true" Elevation="0" 
+    <MudTable Items="employees" Hover="true" Elevation="0" 
               Dense="true" Square="true" Height="700" Loading="@isLoading" Style="width:1000px;">
         <ToolBarContent>
             <MudIconButton Disabled="isLoading" Icon="@Icons.Material.Filled.Refresh" Size="Size.Small" OnClick="@(() => Refresh())"></MudIconButton>
@@ -48,11 +48,11 @@ else
             <EditForm Model="@current" OnValidSubmit="@(() => Submit())">
                 @if (pageState.Equals(PageState.Add))
                 {
-                    <MudText Typo="Typo.h5">Add Customer</MudText>
+                    <MudText Typo="Typo.h5">Add Employee</MudText>
                 }
                 else if (pageState.Equals(PageState.Edit))
                 {
-                    <MudText Typo="Typo.h5">Edit Customer</MudText>
+                    <MudText Typo="Typo.h5">Edit Employee</MudText>
                     <MudTextField Margin="Margin.Dense" Style="width:300px;" ReadOnly="true" Variant="Variant.Outlined" Label="Id" @bind-Value="@current.Id" />
                 }
                 <DataAnnotationsValidator />
@@ -145,7 +145,7 @@ else
 @code {
     private PageState pageState;
     private bool isLoading = false;
-    private List<EmployeeEntity> customers = new List<EmployeeEntity>();
+    private List<EmployeeEntity> employees = new List<EmployeeEntity>();
     private Current current;
     public CronHandler cronHandler = default!;
 
@@ -155,12 +155,12 @@ else
         {
         }
 
-        public Current(EmployeeEntity customer)
+        public Current(EmployeeEntity employee)
         {
-            Id = customer.Id;
-            Name = customer.Name;
-            Age = customer.Age;
-            CronWorkOrder = customer.CronWorkOrder;
+            Id = employee.Id;
+            Name = employee.Name;
+            Age = employee.Age;
+            CronWorkOrder = employee.CronWorkOrder;
         }
 
         public long Id { get; set; }
@@ -181,8 +181,8 @@ else
 
         cronHandler = new CronHandler(Logger);
 
-        var allCustomers = customerRepository.GetAll();
-        customers = allCustomers.ToList();
+        var allEmplayees = employeeRepository.GetAll();
+        employees = allEmplayees.ToList();
         StateHasChanged();
     }
 
@@ -211,7 +211,7 @@ else
             {
                 try
                 {
-                    customerRepository.Add(new EmployeeEntity() { Name = current.Name, Age = current.Age , CronWorkOrder= current.CronWorkOrder });
+                    employeeRepository.Add(new EmployeeEntity() { Name = current.Name, Age = current.Age , CronWorkOrder= current.CronWorkOrder });
                     await UpdateLocalData();
                     pageState = PageState.Default;
                 }
@@ -252,14 +252,14 @@ else
             {
                 try
                 {
-                    var entity = customers.FirstOrDefault(x => x.Id == current.Id);
+                    var entity = employees.FirstOrDefault(x => x.Id == current.Id);
                     if (entity != null)
                     {
                         entity.Name = current.Name;
                         entity.Age = current.Age;
                         entity.CronWorkOrder = current.CronWorkOrder;
 
-                        customerRepository.Update(entity);
+                        employeeRepository.Update(entity);
 
                         await UpdateLocalData();
 
@@ -286,7 +286,7 @@ else
 
         if (!dialog?.Canceled ?? false)
         {
-            customerRepository.Delete(entity);
+            employeeRepository.Delete(entity);
             await UpdateLocalData();
         }
     }
@@ -312,8 +312,8 @@ else
     private async Task UpdateLocalData()
     {
         isLoading = true;
-        var allCustomers = customerRepository.GetAll();
-        customers = allCustomers.ToList();
+        var allEmployees = employeeRepository.GetAll();
+        employees = allEmployees.ToList();
         isLoading = false;
 
         await InvokeAsync(() => StateHasChanged());

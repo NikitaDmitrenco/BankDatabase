@@ -27,6 +27,7 @@ else
 }
 
 builder.Services.AddScoped<EmployeeRepository>();
+builder.Services.AddScoped<CustomerRepository>();
 
 var app = builder.Build();
 
