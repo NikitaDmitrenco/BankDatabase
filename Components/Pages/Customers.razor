@@ -4,7 +4,8 @@
 @using BankDatabase.Entities
 @using BankDatabase.Repositories
 @using BankDatabase.Abstractions.Cron;
-@using System.ComponentModel.DataAnnotations
+@using BankDatabase.Infostructure.Mappers
+@using BankDatabase.Infostructure.Currents
 @rendermode InteractiveServer
 @inject CustomerRepository customerRepository
 @inject ILogger<Customers> Logger
@@ -15,7 +16,7 @@
 
 @if (pageState.Equals(PageState.Default))
 {   
-    <MudTable Items="customers" Hover="true" Elevation="0" 
+    <MudTable Items="entities" Hover="true" Elevation="0" 
               Dense="true" Square="true" Height="700" Loading="@isLoading" Style="width:1000px;">
         <ToolBarContent>
             <MudIconButton Disabled="isLoading" Icon="@Icons.Material.Filled.Refresh" Size="Size.Small" OnClick="@(() => Refresh())"></MudIconButton>
@@ -91,48 +92,16 @@ else
 @code {
     private PageState pageState;
     private bool isLoading = false;
-    private List<CustomerEntity> customers = new List<CustomerEntity>();
-    private Current current;
-    public CronHandler cronHandler = default!;
-
-    private class Current
-    {
-        public Current()
-        {
-        }
-
-        public Current(CustomerEntity customer)
-        {
-            Id = customer.Id;
-            Name = customer.Name;
-            PhoneNumber = customer.PhoneNumber;
-            EmailAddress = customer.EmailAddress;
-        }
-
-        public long Id { get; set; }
-
-        [Required(ErrorMessage = "Name is required")]
-        public string Name { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Phone Number is required")]
-        [PhoneAttribute(ErrorMessage ="Phone number is invalid")]
-        public string PhoneNumber { get; set; }
-
-        [Required(ErrorMessage = "Email is required")]
-        [EmailAddressAttribute(ErrorMessage = "The email address is invalid")]
-        public string EmailAddress { get; set; } = string.Empty;
-    }
+    private List<CustomerEntity> entities = new List<CustomerEntity>();
+    private CurrentCustomer current = new CurrentCustomer();
+    private CustomerMapper mapper = new CustomerMapper();
 
     protected override async Task OnInitializedAsync()
     {
         pageState = PageState.Default;
 
-        current = new Current();
+        await UpdateLocalData();
 
-        cronHandler = new CronHandler(Logger);
-
-        var allCustomers = customerRepository.GetAll();
-        customers = allCustomers.ToList();
         StateHasChanged();
     }
 
@@ -149,8 +118,6 @@ else
     {
         if (pageState.Equals(PageState.Default))
         {
-            current = new Current();
-
             pageState = PageState.Add;
         }
         else if (pageState.Equals(PageState.Add))
@@ -161,9 +128,13 @@ else
             {
                 try
                 {
-                    customerRepository.Add(new CustomerEntity() { Name = current.Name, PhoneNumber = current.PhoneNumber, EmailAddress = current.EmailAddress });
+                    var entity = new CustomerEntity();
+
+                    mapper.ApplyToEntity(entity, current);
+
+                    customerRepository.Add(entity);
+
                     await UpdateLocalData();
-                    pageState = PageState.Default;
                 }
                 catch (Exception ex)
                 {
@@ -181,7 +152,7 @@ else
     {
         if (pageState.Equals(PageState.Default))
         {
-            current = new Current(entity);
+            current = mapper.ToCurrent(entity);
 
             pageState = PageState.Edit;
         }
@@ -197,23 +168,15 @@ else
             {
                 try
                 {
-                    var entity = customers.FirstOrDefault(x => x.Id == current.Id);
-                    if (entity != null)
-                    {
-                        entity.Name = current.Name;
-                        entity.PhoneNumber = current.PhoneNumber;
-                        entity.EmailAddress = current.EmailAddress;
+                    var entity = entities.First(x => x.Id == current.Id);
 
-                        customerRepository.Update(entity);
+                    mapper.ApplyToEntity(entity, current);
 
-                        await UpdateLocalData();
+                    customerRepository.Update(entity);
 
-                        pageState = PageState.Default;
+                    await UpdateLocalData();
 
-                        DisposeUI();
-
-                        StateHasChanged();
-                    }
+                    StateHasChanged();
                 }
                 catch (Exception ex) 
                 {
@@ -242,9 +205,6 @@ else
 
         if (!dialog?.Canceled ?? false)
         {
-            pageState = PageState.Default;
-            current = new Current();
-
             DisposeUI();
         }
     }
@@ -257,18 +217,19 @@ else
     private async Task UpdateLocalData()
     {
         isLoading = true;
-        var allCustomers = customerRepository.GetAll();
-        customers = allCustomers.ToList();
+        
+        entities = customerRepository.GetAll();
+
         isLoading = false;
 
-        await InvokeAsync(() => StateHasChanged());
+        await InvokeAsync(StateHasChanged);
     }
 
     private void DisposeUI()
     {
         pageState = PageState.Default;
 
-        current = new Current();
+        current = new CurrentCustomer();
 
         StateHasChanged();
     }

@@ -4,6 +4,8 @@
 @using BankDatabase.Entities
 @using BankDatabase.Repositories
 @using BankDatabase.Abstractions.Cron;
+@using BankDatabase.Infostructure.Currents;
+@using BankDatabase.Infostructure.Mappers;
 @using System.ComponentModel.DataAnnotations
 @rendermode InteractiveServer
 @inject EmployeeRepository employeeRepository
@@ -15,7 +17,7 @@
 
 @if (pageState.Equals(PageState.Default))
 {   
-    <MudTable Items="employees" Hover="true" Elevation="0" 
+    <MudTable Items="entities" Hover="true" Elevation="0" 
               Dense="true" Square="true" Height="700" Loading="@isLoading" Style="width:1000px;">
         <ToolBarContent>
             <MudIconButton Disabled="isLoading" Icon="@Icons.Material.Filled.Refresh" Size="Size.Small" OnClick="@(() => Refresh())"></MudIconButton>
@@ -145,44 +147,18 @@ else
 @code {
     private PageState pageState;
     private bool isLoading = false;
-    private List<EmployeeEntity> employees = new List<EmployeeEntity>();
-    private Current current;
-    public CronHandler cronHandler = default!;
-
-    private class Current
-    {
-        public Current()
-        {
-        }
-
-        public Current(EmployeeEntity employee)
-        {
-            Id = employee.Id;
-            Name = employee.Name;
-            Age = employee.Age;
-            CronWorkOrder = employee.CronWorkOrder;
-        }
-
-        public long Id { get; set; }
-
-        [Required(ErrorMessage = "Name is required")]
-        public string Name { get; set; } = string.Empty;
-        [Required]
-        [Range(16, 60, ErrorMessage = "Age must be specified and be between 16 and 60 years old")]
-        public int Age { get; set; } = 16;
-        public string CronWorkOrder { get; set; } = CronHandler.EmptyCronString;
-    }
+    private List<EmployeeEntity> entities = new List<EmployeeEntity>();
+    private CurrentEmployee current = new CurrentEmployee();
+    public CronHandler cronHandler;
+    public EmployeeMapper mapper = new EmployeeMapper();
 
     protected override async Task OnInitializedAsync()
     {
         pageState = PageState.Default;
 
-        current = new Current();
-
         cronHandler = new CronHandler(Logger);
 
-        var allEmplayees = employeeRepository.GetAll();
-        employees = allEmplayees.ToList();
+        entities = employeeRepository.GetAll();
         StateHasChanged();
     }
 
@@ -199,8 +175,6 @@ else
     {
         if (pageState.Equals(PageState.Default))
         {
-            current = new Current();
-
             pageState = PageState.Add;
         }
         else if (pageState.Equals(PageState.Add))
@@ -211,9 +185,12 @@ else
             {
                 try
                 {
-                    employeeRepository.Add(new EmployeeEntity() { Name = current.Name, Age = current.Age , CronWorkOrder= current.CronWorkOrder });
+                    var entity = new EmployeeEntity();
+                    mapper.ApplyToEntity(entity, current);
+
+                    employeeRepository.Add(entity);
+
                     await UpdateLocalData();
-                    pageState = PageState.Default;
                 }
                 catch (Exception ex)
                 {
@@ -231,7 +208,7 @@ else
     {
         if (pageState.Equals(PageState.Default))
         {
-            current = new Current(entity);
+            current = mapper.ToCurrent(entity);
 
             if (!cronHandler.ApplyCronOnSelectedValues(current.CronWorkOrder))
             {
@@ -252,23 +229,15 @@ else
             {
                 try
                 {
-                    var entity = employees.FirstOrDefault(x => x.Id == current.Id);
-                    if (entity != null)
-                    {
-                        entity.Name = current.Name;
-                        entity.Age = current.Age;
-                        entity.CronWorkOrder = current.CronWorkOrder;
+                    var entity = entities.First(x => x.Id == current.Id);
 
-                        employeeRepository.Update(entity);
+                    mapper.ApplyToEntity(entity, current);
 
-                        await UpdateLocalData();
+                    employeeRepository.Update(entity);
 
-                        pageState = PageState.Default;
+                    await UpdateLocalData();
 
-                        DisposeUI();
-
-                        StateHasChanged();
-                    }
+                    StateHasChanged();
                 }
                 catch (Exception ex) 
                 {
@@ -297,9 +266,6 @@ else
 
         if (!dialog?.Canceled ?? false)
         {
-            pageState = PageState.Default;
-            current = new Current();
-
             DisposeUI();
         }
     }
@@ -307,23 +273,26 @@ else
     private async Task Refresh()
     {
         await UpdateLocalData();
+
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task UpdateLocalData()
     {
         isLoading = true;
-        var allEmployees = employeeRepository.GetAll();
-        employees = allEmployees.ToList();
+
+        entities = employeeRepository.GetAll();
+
         isLoading = false;
 
-        await InvokeAsync(() => StateHasChanged());
+        await InvokeAsync(StateHasChanged);
     }
 
     private void DisposeUI()
     {
         pageState = PageState.Default;
 
-        current = new Current();
+        current = new CurrentEmployee();
 
         cronHandler = new CronHandler(Logger);
 
