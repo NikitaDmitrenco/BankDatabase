@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BankDatabase.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace BankDatabase.Repositories;
 
-public class BaseRepository<TEntity> where TEntity : class
+public class BaseRepository<TEntity> where TEntity : class, IEntity
 {
     private readonly IDbContextFactory<ApplicationContext> factory;
 
