@@ -1,34 +1,49 @@
-﻿namespace BankDatabase.Repositories;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace BankDatabase.Repositories;
 
 public class BaseRepository<TEntity> where TEntity : class
 {
-    protected readonly ApplicationContext context;
-    public BaseRepository(ApplicationContext context)
+    private readonly IDbContextFactory<ApplicationContext> factory;
+
+    public BaseRepository(IDbContextFactory<ApplicationContext> factory)
     {
-        this.context = context;
+        this.factory = factory;
     }
 
     public virtual List<TEntity> GetAll() 
     {
-        var set = context.Set<TEntity>();
-        return set.ToList();
+        using (var context = factory.CreateDbContext()) 
+        {
+            var set = context.Set<TEntity>();
+            return set.ToList();
+        }
     }
 
     public virtual void Add(TEntity entity) 
     {
-        context.Add(entity);
-        context.SaveChanges();
+        using (var context = factory.CreateDbContext())
+        {
+            context.Add(entity);
+            context.SaveChanges();
+        }
     }
 
     public virtual void Update(TEntity entity) 
     {
-        context.Update(entity);
-        context.SaveChanges();
+        using (var context = factory.CreateDbContext())
+        {
+            context.Update(entity);
+            context.SaveChanges();
+        }
     }
 
     public virtual void Delete(TEntity entity) 
     {
-        context.Remove(entity);
-        context.SaveChanges();
+        using (var context = factory.CreateDbContext()) 
+        {
+            context.Remove(entity);
+            context.SaveChanges();
+        }
     }
 }
