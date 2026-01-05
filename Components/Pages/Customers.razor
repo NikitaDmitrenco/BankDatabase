@@ -15,76 +15,81 @@
 
 @if (pageState.Equals(PageState.Default))
 {   
-    <MudTable Items="entities" Hover="true" Elevation="0" 
-              Dense="true" Square="true" Height="700" Loading="@isLoading" Style="width:1000px;">
-        <ToolBarContent>
-            <MudIconButton Disabled="isLoading" Icon="@Icons.Material.Filled.Refresh" Size="Size.Small" OnClick="@(() => Refresh())"></MudIconButton>
-        </ToolBarContent>
-        <HeaderContent>
-            <MudTh>Id</MudTh>
-            <MudTh>Name</MudTh>
-            <MudTh>Phone Number</MudTh>
-            <MudTh>Email Address</MudTh>
-            <MudTh Style="text-align:right;">
-                <MudIconButton Disabled="isLoading" Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="@(() => Add())"/>
-            </MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd>@context.Id</MudTd>
-            <MudTd>@context.Name</MudTd>
-            <MudTd>@context.PhoneNumber</MudTd>
-            <MudTd>@context.EmailAddress</MudTd>
-            <MudTd Style="text-align:right;">
-                <MudIconButton Disabled="isLoading" Size="Size.Small" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => StartEdit(context))" Class="ml-auto"/>
-                <MudIconButton Disabled="isLoading" Size="Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="@(() => Delete(context))" Class="ml-auto"/>
-            </MudTd>
-        </RowTemplate>
-    </MudTable>
+    <MudPaper Width="100%" Class="d-flex justify-center align-content-start" Elevation="0">
+        <MudTable Items="entities" Hover="true" Elevation="0" 
+              Dense="true" Square="true" Height="700"
+              Loading="@isLoading" Style="margin-top:20px; width:1000px;">
+            <ToolBarContent>
+                <MudIconButton Disabled="isLoading" Icon="@Icons.Material.Filled.Refresh" Size="Size.Small" OnClick="@(() => Refresh())"></MudIconButton>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Id</MudTh>
+                <MudTh>Name</MudTh>
+                <MudTh>Phone Number</MudTh>
+                <MudTh>Email Address</MudTh>
+                <MudTh Style="text-align:right;">
+                    <MudIconButton Disabled="isLoading" Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="@(() => Add())"/>
+                </MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.Id</MudTd>
+                <MudTd>@context.Name</MudTd>
+                <MudTd>@context.PhoneNumber</MudTd>
+                <MudTd>@context.EmailAddress</MudTd>
+                <MudTd Style="text-align:right;">
+                    <MudIconButton Disabled="isLoading" Size="Size.Small" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => StartEdit(context))" Class="ml-auto"/>
+                    <MudIconButton Disabled="isLoading" Size="Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="@(() => Delete(context))" Class="ml-auto"/>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
 }
 else
 {
-    <MudPaper Elevation="0" Width="1200px;">
-        <MudStack Row="true">
-            <EditForm Model="@current" OnValidSubmit="@(() => Submit())">
-                @if (pageState.Equals(PageState.Add))
-                {
-                    <MudText Typo="Typo.h5">Add Customer</MudText>
-                }
-                else if (pageState.Equals(PageState.Edit))
-                {
-                    <MudText Typo="Typo.h5">Edit Customer</MudText>
-                    <MudTextField Margin="Margin.Dense" Style="width:300px;" ReadOnly="true" Variant="Variant.Outlined" Label="Id" @bind-Value="@current.Id" />
-                }
-                <DataAnnotationsValidator />
-                <MudTextField Margin="Margin.Dense" Style="width:300px;" 
-                              Variant="Variant.Outlined" 
-                              For="@(() => current.Name)"
-                              Label="Name" @bind-Value="@current.Name" />
-                <MudTextField Margin="Margin.Dense" Style="width:300px;"
-                              Variant="Variant.Outlined" 
-                              HelperText="+373 xx xxx xxx"
-                              Mask="@(new PatternMask("00 000 000"))"
-                              For="@(() => current.PhoneNumber)"
-                              Label="Phone Number" @bind-Value="@current.PhoneNumber" />
-                <MudTextField Margin="Margin.Dense" Style="width:300px;"
-                              Variant="Variant.Outlined" 
-                              For="@(() => current.EmailAddress)"
-                              Label="Email Address" @bind-Value="@current.EmailAddress" />
-                <MudStack Row="true" Spacing="3">
-                    <MudButton OnClick="@(() => Cancel())" Variant="Variant.Filled" Color="Color.Primary">Cancel</MudButton>
-                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">
-                        @if (pageState.Equals(PageState.Add))
-                        {
-                            <MudText Typo="Typo.button">Add</MudText>
-                        }
-                        else if (pageState.Equals(PageState.Edit)) 
-                        {
-                            <MudText Typo="Typo.button">Edit</MudText>
-                        }
-                    </MudButton>
-                </MudStack>
-            </EditForm>
-        </MudStack>
+    <MudPaper Width="100%" Class="d-flex justify-center align-content-start" Elevation="0">
+        <MudPaper Elevation="0" Style="margin-top:20px; width:1000px;">
+            <MudStack Row="true">
+                <EditForm Model="@current" OnValidSubmit="@(() => Submit())">
+                    @if (pageState.Equals(PageState.Add))
+                    {
+                        <MudText Typo="Typo.h5">Add Customer</MudText>
+                    }
+                    else if (pageState.Equals(PageState.Edit))
+                    {
+                        <MudText Typo="Typo.h5">Edit Customer</MudText>
+                        <MudTextField Margin="Margin.Dense" Style="width:300px;" ReadOnly="true" Variant="Variant.Outlined" Label="Id" @bind-Value="@current.Id" />
+                    }
+                    <DataAnnotationsValidator />
+                    <MudTextField Margin="Margin.Dense" Style="width:300px;" 
+                                  Variant="Variant.Outlined" 
+                                  For="@(() => current.Name)"
+                                  Label="Name" @bind-Value="@current.Name" Class="mt-3" />
+                    <MudTextField Margin="Margin.Dense" Style="width:300px;"
+                                  Variant="Variant.Outlined" 
+                                  HelperText="+373 xx xxx xxx"
+                                  Mask="@(new PatternMask("00 000 000"))"
+                                  For="@(() => current.PhoneNumber)"
+                                  Label="Phone Number" @bind-Value="@current.PhoneNumber" Class="mt-3" />
+                    <MudTextField Margin="Margin.Dense" Style="width:300px;"
+                                  Variant="Variant.Outlined" 
+                                  For="@(() => current.EmailAddress)"
+                                  Label="Email Address" @bind-Value="@current.EmailAddress" Class="mt-3" />
+                    <MudStack Row="true" Spacing="3" Class="mt-3">
+                        <MudButton OnClick="@(() => Cancel())" Variant="Variant.Filled" Color="Color.Primary">Cancel</MudButton>
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">
+                            @if (pageState.Equals(PageState.Add))
+                            {
+                                <MudText Typo="Typo.button">Add</MudText>
+                            }
+                            else if (pageState.Equals(PageState.Edit)) 
+                            {
+                                <MudText Typo="Typo.button">Edit</MudText>
+                            }
+                        </MudButton>
+                    </MudStack>
+                </EditForm>
+            </MudStack>
+        </MudPaper>
     </MudPaper>
 }
 
