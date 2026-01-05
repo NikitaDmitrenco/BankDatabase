@@ -1,5 +1,5 @@
-﻿using BankDatabase.Entities;
-using BankDatabase.Infostructure.Currents;
+﻿using BankDatabase.Infostructure.Currents;
+using BankDatabase.Infostructure.Entities;
 
 namespace BankDatabase.Infostructure.Mappers;
 

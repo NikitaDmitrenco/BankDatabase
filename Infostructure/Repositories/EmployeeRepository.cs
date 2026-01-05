@@ -1,12 +1,12 @@
-﻿using BankDatabase.Entities;
-using BankDatabase;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using BankDatabase.Infostructure.Entities;
 
-namespace BankDatabase.Repositories;
+namespace BankDatabase.Infostructure.Repositories;
 
 public class EmployeeRepository : BaseRepository<EmployeeEntity>
 {
     private readonly IDbContextFactory<ApplicationContext> factory;
+
     public EmployeeRepository(IDbContextFactory<ApplicationContext> factory) : base(factory)
     {
         this.factory = factory;

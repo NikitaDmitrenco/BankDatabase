@@ -1,9 +1,8 @@
 ﻿@page "/employees"
 @using BankDatabase
-@using BankDatabase.Enums
-@using BankDatabase.Entities
-@using BankDatabase.Repositories
-@using BankDatabase.Abstractions.Cron;
+@using BankDatabase.Infostructure.Enums
+@using BankDatabase.Infostructure.Entities
+@using BankDatabase.Infostructure.Repositories
 @using BankDatabase.Infostructure.Currents;
 @using BankDatabase.Infostructure.Mappers;
 @using System.ComponentModel.DataAnnotations
@@ -26,7 +25,9 @@
             <MudTh>Id</MudTh>
             <MudTh>Name</MudTh>
             <MudTh>Age</MudTh>
-            <MudTh>Cron Work Order</MudTh>
+            <MudTh>Position</MudTh>
+            <MudTh>PhoneNumber</MudTh>
+            <MudTh>Address</MudTh>
             <MudTh Style="text-align:right;">
                 <MudIconButton Disabled="isLoading" Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="@(() => Add())"/>
             </MudTh>
@@ -35,7 +36,9 @@
             <MudTd>@context.Id</MudTd>
             <MudTd>@context.Name</MudTd>
             <MudTd>@context.Age</MudTd>
-            <MudTd>@context.CronWorkOrder</MudTd>
+            <MudTd>@context.Position</MudTd>
+            <MudTd>@context.PhoneNumber</MudTd>
+            <MudTd>@context.Address</MudTd>
             <MudTd Style="text-align:right;">
                 <MudIconButton Disabled="isLoading" Size="Size.Small" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => StartEdit(context))" Class="ml-auto"/>
                 <MudIconButton Disabled="isLoading" Size="Size.Small" Icon="@Icons.Material.Filled.Delete" OnClick="@(() => Delete(context))" Class="ml-auto"/>
@@ -68,8 +71,18 @@ else
                               Label="Age" @bind-Value="@current.Age" />
                 <MudTextField Margin="Margin.Dense" Style="width:300px;"
                               Variant="Variant.Outlined" 
-                              ReadOnly="true"
-                              Label="Cron Work Order" @bind-Value="@current.CronWorkOrder" />
+                              For="@(() => current.Position)"
+                              Label="Position" @bind-Value="@current.Position" />
+                <MudTextField Margin="Margin.Dense" Style="width:300px;"
+                              Variant="Variant.Outlined"
+                              HelperText="+373 xx xxx xxx"
+                              Mask="@(new PatternMask("00 000 000"))"
+                              For="@(() => current.PhoneNumber)"
+                              Label="Phone Number" @bind-Value="@current.PhoneNumber" />
+                <MudTextField Margin="Margin.Dense" Style="width:300px;"
+                              Variant="Variant.Outlined" 
+                              For="@(() => current.Address)"
+                              Label="Address" @bind-Value="@current.Address" />
                 <MudStack Row="true" Spacing="3">
                     <MudButton OnClick="@(() => Cancel())" Variant="Variant.Filled" Color="Color.Primary">Cancel</MudButton>
                     <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">
@@ -84,61 +97,6 @@ else
                     </MudButton>
                 </MudStack>
             </EditForm>
-            <MudStack Spacing="5" Style="width:70%; margin-left:20px;">
-                <MudStack>
-                    <MudStack Row="true">
-                        <MudText Style="width:50px;" Typo="Typo.h5">Week</MudText>
-                        <MudRadioGroup Style="width:250px; margin:0 10px 0 20px;" @bind-Value="cronHandler.WeekDays.CronType" T="CronType">
-                            <MudRadio Value="CronType.Enum" Size="MudBlazor.Size.Small">Enum</MudRadio>
-                            <MudRadio Value="CronType.Range" Size="MudBlazor.Size.Small">Range</MudRadio>
-                        </MudRadioGroup>
-                        <div>
-                            <MudTextField @bind-Value="@cronHandler.WeekDays.ValueInput" Variant="Variant.Outlined"
-                                          Label="a-b/a,b,c,d" OnKeyDown="@((k) => OnCronInputEnter(k, cronHandler.WeekDays))" Immediate="true"
-                                          Error="@cronHandler.WeekDays.ValueInputError" ErrorText="@cronHandler.WeekDays.ValueInputErrorText"
-                                          Margin="Margin.Dense" Style="width:200px;" />
-                        </div>
-                        <MudIconButton Icon="@Icons.Material.Filled.Backspace" OnClick="@(() => OnClearCronClick(cronHandler.WeekDays))" />
-                    </MudStack>
-                    <MudStack Row="true" Spacing="4" Wrap="Wrap.Wrap" AlignItems="AlignItems.Start" Justify="Justify.FlexStart">
-                        @foreach (var wd in cronHandler.WeekDays.AllValues)
-                        {
-                            <MudButton Class="pr-3" Variant="Variant.Filled" Color="@(cronHandler.GetCronRowButtonStyle(wd, cronHandler.WeekDays))"
-                                       OnClick="@(() => OnCronRowButtonClick(@wd, cronHandler.WeekDays))">@wd</MudButton>
-                        }
-                    </MudStack>
-                </MudStack>
-                <MudStack Row="true" Justify="Justify.FlexStart">
-                    <MudText Style="width:320px; margin-right:20px;" Typo="Typo.h5">Month Day</MudText>
-                    <div>
-                        <MudTextField @bind-Value="@cronHandler.MonthDays.ValueInput" Variant="Variant.Outlined"
-                                      Label="a-b/a,b,c,d" OnKeyDown="@((k) => OnCronInputEnter(k, cronHandler.MonthDays))" Immediate="true"
-                                      Error="cronHandler.MonthDays.ValueInputError" ErrorText="@cronHandler.MonthDays.ValueInputErrorText"
-                                      Margin="Margin.Dense" Style="width:200px;" />
-                    </div>
-                    <MudIconButton Icon="@Icons.Material.Filled.Backspace" OnClick="@(() => OnClearCronClick(cronHandler.MonthDays))" />
-                </MudStack>
-                <MudStack Row="true" Justify="Justify.FlexStart">
-                    <MudText Style="width:320px; margin-right:20px;" Typo="Typo.h5">Hour</MudText>
-                    <div>
-                        <MudTextField @bind-Value="@cronHandler.Hours.ValueInput" Variant="Variant.Outlined"
-                                      Label="a-b/a,b,c,d" OnKeyDown="@((k) => OnCronInputEnter(k, cronHandler.Hours))" Immediate="true"
-                                      Error="@cronHandler.Hours.ValueInputError" ErrorText="@cronHandler.Hours.ValueInputErrorText"
-                                      Margin="Margin.Dense" Style="width:200px;" />
-                    </div>
-                    <MudIconButton Icon="@Icons.Material.Filled.Backspace" OnClick="@(() => OnClearCronClick(cronHandler.Hours))" />
-                </MudStack>
-                <MudStack Row="true" Justify="Justify.FlexStart">
-                    <MudText Style="width:320px; margin-right:20px;" Typo="Typo.h5">Minute</MudText>
-                    <div>
-                        <MudTextField @bind-Value="@cronHandler.Minutes.ValueInput" Variant="Variant.Outlined"
-                                      Label="a-b/a,b,c,d" OnKeyDown="@((k) => OnCronInputEnter(k, cronHandler.Minutes))" Immediate="true"
-                                      Error="@cronHandler.Minutes.ValueInputError" ErrorText="@cronHandler.Minutes.ValueInputErrorText"
-                                      Margin="Margin.Dense" Style="width:200px;" />
-                    </div>
-                    <MudIconButton Icon="@Icons.Material.Filled.Backspace" OnClick="@(() => OnClearCronClick(cronHandler.Minutes))" />
-                </MudStack>
-            </MudStack>
         </MudStack>
     </MudPaper>
 }
@@ -149,16 +107,14 @@ else
     private bool isLoading = false;
     private List<EmployeeEntity> entities = new List<EmployeeEntity>();
     private CurrentEmployee current = new CurrentEmployee();
-    public CronHandler cronHandler;
     public EmployeeMapper mapper = new EmployeeMapper();
 
     protected override async Task OnInitializedAsync()
     {
         pageState = PageState.Default;
 
-        cronHandler = new CronHandler(Logger);
+        await UpdateLocalData();
 
-        entities = employeeRepository.GetAll();
         StateHasChanged();
     }
 
@@ -209,11 +165,6 @@ else
         if (pageState.Equals(PageState.Default))
         {
             current = mapper.ToCurrent(entity);
-
-            if (!cronHandler.ApplyCronOnSelectedValues(current.CronWorkOrder))
-            {
-                current.CronWorkOrder = CronHandler.EmptyCronString;
-            }
 
             pageState = PageState.Edit;
         }
@@ -294,47 +245,19 @@ else
 
         current = new CurrentEmployee();
 
-        cronHandler = new CronHandler(Logger);
-
-        current.CronWorkOrder = CronHandler.EmptyCronString;
-
         StateHasChanged();
     }
 
-    public async Task OnCronInputEnter(KeyboardEventArgs keyboardEventArgs, CronHandler.CronCategory cronCategory)
-    {
-        if (keyboardEventArgs.Key == "Enter")
-        {
-            current.CronWorkOrder = cronHandler.HandleCronInput(current.CronWorkOrder, cronCategory);
-
-            await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private void OnClearCronClick(CronHandler.CronCategory cronCategory)
-    {
-        current.CronWorkOrder = cronHandler.GetClearedCron(current.CronWorkOrder, cronCategory);
-
-        StateHasChanged();
-    }
-
-    private void OnCronRowButtonClick(string data, CronHandler.CronCategory cronCategory)
-    {
-        current.CronWorkOrder = cronHandler.HandleCronClick(data, current.CronWorkOrder, cronCategory);
-
-        StateHasChanged();
-    }
-
-    public async Task<DialogResult?> OpenDialog(Enums.Dialog dialog)
+    public async Task<DialogResult?> OpenDialog(Dialog dialog)
     {
         IDialogReference window = default!;
 
         switch (dialog)
         {
-            case Enums.Dialog.ConfirmAdd: window = await DialogService.ShowAsync<Dialogs.ConfirmAdd>(); break;
-            case Enums.Dialog.ConfirmEdit: window = await DialogService.ShowAsync<Dialogs.ConfirmEdit>(); break;
-            case Enums.Dialog.ConfirmDelete: window = await DialogService.ShowAsync<Dialogs.ConfirmDelete>(); break;
-            case Enums.Dialog.ConfirmCancel: window = await DialogService.ShowAsync<Dialogs.ConfirmCancel>(); break;
+            case Dialog.ConfirmAdd: window = await DialogService.ShowAsync<Dialogs.ConfirmAdd>(); break;
+            case Dialog.ConfirmEdit: window = await DialogService.ShowAsync<Dialogs.ConfirmEdit>(); break;
+            case Dialog.ConfirmDelete: window = await DialogService.ShowAsync<Dialogs.ConfirmDelete>(); break;
+            case Dialog.ConfirmCancel: window = await DialogService.ShowAsync<Dialogs.ConfirmCancel>(); break;
         }
 
         var result = await window.Result;

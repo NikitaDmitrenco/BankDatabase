@@ -1,5 +1,5 @@
-﻿using BankDatabase.Entities;
-using BankDatabase.Infostructure.Currents;
+﻿using BankDatabase.Infostructure.Currents;
+using BankDatabase.Infostructure.Entities;
 
 namespace BankDatabase.Infostructure.Mappers;
 
@@ -12,7 +12,9 @@ public class EmployeeMapper : IMapper<EmployeeEntity, CurrentEmployee>
             Id = entity.Id,
             Name = entity.Name,
             Age = entity.Age,
-            CronWorkOrder = entity.CronWorkOrder
+            PhoneNumber = entity.PhoneNumber,
+            Address = entity.Address,
+            Position = entity.Position,
         };
     }
 
@@ -21,6 +23,8 @@ public class EmployeeMapper : IMapper<EmployeeEntity, CurrentEmployee>
         entity.Id = current.Id;
         entity.Name = current.Name;
         entity.Age = current.Age;
-        entity.CronWorkOrder = current.CronWorkOrder;
+        entity.PhoneNumber = current.PhoneNumber;
+        entity.Address = current.Address;
+        entity.Position = current.Address;
     }
 }

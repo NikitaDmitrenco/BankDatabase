@@ -1,4 +1,4 @@
-﻿using BankDatabase.Entities;
+﻿using BankDatabase.Infostructure.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace BankDatabase;

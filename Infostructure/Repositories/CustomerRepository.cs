@@ -1,7 +1,7 @@
-﻿using BankDatabase.Entities;
+﻿using BankDatabase.Infostructure.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace BankDatabase.Repositories;
+namespace BankDatabase.Infostructure.Repositories;
 
 public class CustomerRepository : BaseRepository<CustomerEntity>
 {
@@ -14,10 +14,9 @@ public class CustomerRepository : BaseRepository<CustomerEntity>
 
     public override List<CustomerEntity> GetAll()
     {
-        using (var context = factory.CreateDbContext())
-        {
-            var set = context.Set<CustomerEntity>();
-            return set.ToList();
-        }
+        var context = factory.CreateDbContext();
+
+        var set = context.Set<CustomerEntity>();
+        return set.ToList();
     }
 }

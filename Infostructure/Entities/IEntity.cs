@@ -1,4 +1,4 @@
-﻿namespace BankDatabase.Entities;
+﻿namespace BankDatabase.Infostructure.Entities;
 
 public interface IEntity
 {

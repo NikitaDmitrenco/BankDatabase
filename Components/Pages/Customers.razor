@@ -1,9 +1,8 @@
 ﻿@page "/customers"
 @using BankDatabase
-@using BankDatabase.Enums
-@using BankDatabase.Entities
-@using BankDatabase.Repositories
-@using BankDatabase.Abstractions.Cron;
+@using BankDatabase.Infostructure.Enums
+@using BankDatabase.Infostructure.Entities
+@using BankDatabase.Infostructure.Repositories
 @using BankDatabase.Infostructure.Mappers
 @using BankDatabase.Infostructure.Currents
 @rendermode InteractiveServer
@@ -101,8 +100,6 @@ else
         pageState = PageState.Default;
 
         await UpdateLocalData();
-
-        StateHasChanged();
     }
 
     private async Task Submit()
@@ -234,16 +231,16 @@ else
         StateHasChanged();
     }
 
-    public async Task<DialogResult?> OpenDialog(Enums.Dialog dialog)
+    public async Task<DialogResult?> OpenDialog(Dialog dialog)
     {
         IDialogReference window = default!;
 
         switch (dialog)
         {
-            case Enums.Dialog.ConfirmAdd: window = await DialogService.ShowAsync<Dialogs.ConfirmAdd>(); break;
-            case Enums.Dialog.ConfirmEdit: window = await DialogService.ShowAsync<Dialogs.ConfirmEdit>(); break;
-            case Enums.Dialog.ConfirmDelete: window = await DialogService.ShowAsync<Dialogs.ConfirmDelete>(); break;
-            case Enums.Dialog.ConfirmCancel: window = await DialogService.ShowAsync<Dialogs.ConfirmCancel>(); break;
+            case Dialog.ConfirmAdd: window = await DialogService.ShowAsync<Dialogs.ConfirmAdd>(); break;
+            case Dialog.ConfirmEdit: window = await DialogService.ShowAsync<Dialogs.ConfirmEdit>(); break;
+            case Dialog.ConfirmDelete: window = await DialogService.ShowAsync<Dialogs.ConfirmDelete>(); break;
+            case Dialog.ConfirmCancel: window = await DialogService.ShowAsync<Dialogs.ConfirmCancel>(); break;
         }
 
         var result = await window.Result;

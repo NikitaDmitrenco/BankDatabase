@@ -1,29 +1,26 @@
 using BankDatabase;
 using BankDatabase.Components;
-using BankDatabase.Entities;
-using BankDatabase.Repositories;
+using BankDatabase.Infostructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add MudBlazor se rvices
 builder.Services.AddMudServices();
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddDbContextFactory<ApplicationContext>(opt =>
-        opt.UseSqlite($"Data Source=datamonitor.db")
+        opt.UseSqlite($"Data Source=bankdatabase.db")
         .EnableSensitiveDataLogging());
 }
 else
 {
     builder.Services.AddDbContextFactory<ApplicationContext>(opt =>
-        opt.UseSqlite($"Data Source=datamonitor.db"));
+        opt.UseSqlite($"Data Source=bankdatabase.db"));
 }
 
 builder.Services.AddScoped<EmployeeRepository>();

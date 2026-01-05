@@ -1,4 +1,4 @@
-﻿namespace BankDatabase.Enums;
+﻿namespace BankDatabase.Infostructure.Enums;
 
 public enum PageState
 {
